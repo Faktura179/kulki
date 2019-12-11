@@ -118,8 +118,32 @@ export function ballWrapper(target:object, key:string, descriptor:PropertyDescri
     
     let originalMethod=descriptor.value;
     descriptor.value=function(...args:any[]):void{
+        if(app.clickedBall!=null){
+            app.clickedBall.element.style.width="40px";
+            app.clickedBall.element.style.height="40px";
+            app.clickedBall.element.style.top="10px";
+            app.clickedBall.element.style.left="10px";
+            app.clickedBall.element.style.border="none";
+        }
+
         let result = originalMethod.apply(this, args)
-        app.clickedBall = this;
+        if(app.clickedBall==this){
+            app.clickedBall.element.style.width="40px";
+            app.clickedBall.element.style.height="40px";
+            app.clickedBall.element.style.top="10px";
+            app.clickedBall.element.style.left="10px";
+            app.clickedBall.element.style.border="none";
+            app.clickedBall=null;
+        }else{
+            app.clickedBall = this;
+        }
+        
+
+        this.element.style.width="55px";
+        this.element.style.height="55px";
+        this.element.style.top="1px";
+        this.element.style.left="1px";
+        this.element.style.border="2px solid black";
     }
 
     return descriptor;
