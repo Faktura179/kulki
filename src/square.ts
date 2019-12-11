@@ -5,6 +5,7 @@ export class Square {
     private occupied:boolean;
     private ball:Ball;
     pos:Position;
+    path:Position[];
 
     constructor(element:Element,pos:Position){
         this.element = <HTMLElement>element;
@@ -12,6 +13,7 @@ export class Square {
         this.occupied=false;
         this.ball = null;
         this.pos=pos;
+        this.path=new Array<Position>();
     }
 
     @squareWrapper
@@ -23,10 +25,16 @@ export class Square {
         return this.occupied
     }
 
+    removeBall():void{
+        this.occupied=false;
+        this.ball=null;
+    }
+
     putBall(ball :Ball):boolean{
         if(this.occupied)
             return false;
         this.ball = ball;
+        ball.pos=this.pos;
         this.occupied=true;
         this.element.appendChild(this.ball.element);
         return true;
@@ -66,6 +74,7 @@ export class Ball{
         this.clicked=!this.clicked;
         return this;
     }
+
 }
 
 export enum Color{

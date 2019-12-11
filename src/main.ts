@@ -35,6 +35,14 @@ export class Kulki {
         }
     }
 
+    clearPaths(){
+        for (let i = 0; i < 9; i++) { 
+            for (let j = 0; j < 9; j++) {
+                this.squares[j][i].path=new Array<Position>();
+            }
+        }
+    }
+
     findPath(sq:Square){
         let path:Array<Array<Array<Position>>> =  new Array<Array<Array<Position>>>()
         for (let i = 0; i < 9; i++) {
@@ -45,8 +53,60 @@ export class Kulki {
             }
             path.push(row);
         }
+        let queue:Square[] = new Array<Square>();
+        queue.push(sq);
+        while(queue.length!=0){
+            let square:Square = queue.shift();
+            path[square.pos.y][square.pos.x] = square.path;
 
-
+            if(square==this.clickedSquare){
+                break;
+            }
+            if(square.pos.x+1<9)
+            if(!this.squares[square.pos.y][square.pos.x+1].isOccupied() && path[square.pos.y][square.pos.x+1].length==0){
+                let newPath:Position[]=square.path.slice(0)
+                newPath.push(this.squares[square.pos.y][square.pos.x+1].pos)
+                this.squares[square.pos.y][square.pos.x+1].path=newPath
+                queue.push(this.squares[square.pos.y][square.pos.x+1])
+            }
+            if(square.pos.x-1>=0)
+            if(!this.squares[square.pos.y][square.pos.x-1].isOccupied() && path[square.pos.y][square.pos.x-1].length==0){
+                let newPath:Position[]=square.path.slice(0)
+                newPath.push(this.squares[square.pos.y][square.pos.x-1].pos)
+                this.squares[square.pos.y][square.pos.x-1].path=newPath
+                queue.push(this.squares[square.pos.y][square.pos.x-1])
+            }
+            if(square.pos.y+1<9)
+            if(!this.squares[square.pos.y+1][square.pos.x].isOccupied() && path[square.pos.y+1][square.pos.x].length==0){
+                let newPath:Position[]=square.path.slice(0)
+                newPath.push(this.squares[square.pos.y+1][square.pos.x].pos)
+                this.squares[square.pos.y+1][square.pos.x].path=newPath
+                queue.push(this.squares[square.pos.y+1][square.pos.x])
+            }
+            if(square.pos.y-1>=0)
+            if(!this.squares[square.pos.y-1][square.pos.x].isOccupied() && path[square.pos.y-1][square.pos.x].length==0){
+                let newPath:Position[]=square.path.slice(0)
+                newPath.push(this.squares[square.pos.y-1][square.pos.x].pos)
+                this.squares[square.pos.y-1][square.pos.x].path=newPath
+                queue.push(this.squares[square.pos.y-1][square.pos.x])
+            }
+        }
+        console.log(this.clickedSquare.path)
+        this.clickedSquare.path.forEach((el,i)=>{
+            this.squares[el.y][el.x].element.style.backgroundColor="pink"
+        })
+        var finalPath: Position[] = [...this.clickedSquare.path];
+        setTimeout(() => {
+            console.log(finalPath)
+            finalPath.forEach((el,i)=>{
+                this.squares[el.y][el.x].element.style.backgroundColor="white"
+            })
+        }, 1000);
+        if(queue.length!=0){
+            this.squares[this.clickedBall.pos.y][this.clickedBall.pos.x].removeBall()
+            this.clickedSquare.putBall(this.clickedBall);
+        }
+        this.clearPaths()
     }
 
 }
@@ -54,20 +114,20 @@ export class Kulki {
 let app:Kulki = new Kulki();
 (<any>window).app = app;
 
-export function ballWrapper(target:object, key:string, descriptor:PropertyDescriptor){
+export function ballWrapper(target:object, key:string, descriptor:PropertyDescriptor):PropertyDescriptor{
     
     let originalMethod=descriptor.value;
-    descriptor.value=function(...args:any[]){
+    descriptor.value=function(...args:any[]):void{
         let result = originalMethod.apply(this, args)
         app.clickedBall = this;
     }
 
     return descriptor;
 }
-export function squareWrapper(target:object, key:string, descriptor:PropertyDescriptor){
+export function squareWrapper(target:object, key:string, descriptor:PropertyDescriptor):PropertyDescriptor{
     
     let originalMethod=descriptor.value;
-    descriptor.value=function(...args:any[]){
+    descriptor.value=function(...args:any[]):void{
         let result = originalMethod.apply(this, args)
         if(app.clickedBall!=null){
             app.clickedSquare = this;
