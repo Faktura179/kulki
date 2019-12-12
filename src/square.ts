@@ -1,4 +1,4 @@
-import {ballWrapper, squareWrapper, Color} from "./main"
+import {ballWrapper, squareWrapper, Color, highlightPath} from "./main"
 
 export class Square {
     element:HTMLElement;
@@ -10,6 +10,7 @@ export class Square {
     constructor(element:Element,pos:Position){
         this.element = <HTMLElement>element;
         this.element.onclick = this.onClick.bind(this);
+        this.element.onmouseenter = this.onHover.bind(this)
         this.occupied=false;
         this.ball = null;
         this.pos=pos;
@@ -20,6 +21,11 @@ export class Square {
     onClick(event:Event):void{
        // console.log(this)
     }
+
+    @highlightPath
+    onHover(event:Event):void{
+        //console.log(this)
+     }
 
     isOccupied():boolean{
         return this.occupied

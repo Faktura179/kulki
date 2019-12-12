@@ -338,7 +338,7 @@ export class Kulki {
         }
     }
 
-    findPath(sq:Square):void{
+    findPath(sq:Square, move:boolean):void{
         let path:Array<Array<Array<Position>>> =  new Array<Array<Array<Position>>>()
         for (let i = 0; i < 9; i++) {
             let row: Array<Array<Position>> = new Array<Array<Position>>(); 
@@ -389,27 +389,35 @@ export class Kulki {
         //console.log(this.clickedSquare.path)
         this.clickedSquare.path.forEach((el,i)=>{
             this.squares[el.y][el.x].element.style.backgroundColor="pink"
+            if(!move)
+            this.squares[el.y][el.x].element.style.backgroundColor="#e3c2e9"
         })
         var finalPath: Position[] = [...this.clickedSquare.path];
+        if(move)
         setTimeout(() => {
            // console.log(finalPath)
             finalPath.forEach((el,i)=>{
                 this.squares[el.y][el.x].element.style.backgroundColor="white"
             })
         }, 1000);
+
+        if(move)
         if(this.clickedSquare.path.length!=0){
             this.squares[this.clickedBall.pos.y][this.clickedBall.pos.x].removeBall()
             this.clickedSquare.putBall(this.clickedBall);
             this.checkPoints()
         }
         this.clearPaths()
-        this.clickedBall.element.style.width="40px";
-        this.clickedBall.element.style.height="40px";
-        this.clickedBall.element.style.top="10px";
-        this.clickedBall.element.style.left="10px";
-        this.clickedBall.element.style.border="none";
-        this.clickedBall=null;
-        this.clickedSquare=null;
+        if(move){
+            this.clickedBall.element.style.width="40px";
+            this.clickedBall.element.style.height="40px";
+            this.clickedBall.element.style.top="10px";
+            this.clickedBall.element.style.left="10px";
+            this.clickedBall.element.style.border="none";
+            this.clickedBall=null;
+            this.clickedSquare=null;
+        }
+        
     }
 
 }
@@ -457,9 +465,29 @@ export function squareWrapper(target:object, key:string, descriptor:PropertyDesc
     let originalMethod=descriptor.value;
     descriptor.value=function(...args:any[]):void{
         let result = originalMethod.apply(this, args)
-        if(app.clickedBall!=null){
+        if(app.clickedBall!=null && app.clickedBall.pos!=null){
             app.clickedSquare = this;
-            app.findPath(app.squares[app.clickedBall.pos.y][app.clickedBall.pos.x]);
+            app.findPath(app.squares[app.clickedBall.pos.y][app.clickedBall.pos.x],true);
+        }
+    }
+
+    return descriptor;
+}
+export function highlightPath(target:object, key:string, descriptor:PropertyDescriptor):PropertyDescriptor{
+    
+    let originalMethod=descriptor.value;
+    descriptor.value=function(...args:any[]):void{
+
+        for (let i = 0; i < 9; i++) {
+            for (let j = 0; j < 9; j++) {
+                app.squares[i][j].element.style.backgroundColor="white"
+            }
+        }
+
+        let result = originalMethod.apply(this, args)
+        if(app.clickedBall!=null && app.clickedBall.pos!=null){
+            app.clickedSquare = this;
+            app.findPath(app.squares[app.clickedBall.pos.y][app.clickedBall.pos.x],false);
         }
     }
 
