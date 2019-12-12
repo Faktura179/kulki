@@ -1,12 +1,33 @@
-import {Square, Ball, Position, randomColor, Color} from './square'
+import {Square, Ball, Position,} from './square'
 import {Pathfinding} from "./pathfinding"
+
+export enum Color{
+    Red="Red",
+    Green="Green",
+    Blue="Blue",
+    Yellow="Yellow",
+    Cyan="Cyan",
+    Magenta="Magenta",
+    Grey="Grey" 
+}
+
+function randomColor():string{
+    const keys = Object.keys(Color) //.filter(v => isNaN(Number(v)))
+    let val = keys[Math.floor(Math.random()*keys.length)]
+    return val;
+}
 
 export class Kulki {
     clickedBall:Ball;
     squares: Square[][];
     clickedSquare:Square;
+    points:number;
+    nextBalls:Ball[];
+    nextSqaures:HTMLElement[];
 
     constructor(){
+        this.points=0;
+        document.getElementById("pts").innerText = this.points.toString();
         let rows = document.getElementsByClassName("row")
         this.squares = new Array<Array<Square>>();
         for (let i = 0; i < rows.length; i++) {
@@ -21,7 +42,7 @@ export class Kulki {
             this.squares.push(row);
         }
         
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 5; i++) {
             let x:number = Math.floor(Math.random()*9)
             let y:number = Math.floor(Math.random()*9)
             try{
@@ -33,9 +54,26 @@ export class Kulki {
 
             }
         }
+        this.nextSqaures = new Array<HTMLElement>();
+        this.nextBalls = new Array<Ball>();
+        let sqs:HTMLCollectionOf<Element> = document.getElementsByClassName("square1")
+        for (let i = 0; i < sqs.length; i++) {
+            this.nextSqaures.push(<HTMLElement>sqs[i]); 
+        } 
+        
+        for (let i = 0; i < 3; i++) {
+            try{
+                let ball:Ball = new Ball(randomColor(),new Position(-1,-1));
+                this.nextBalls.push(ball)
+                this.nextSqaures[i].appendChild(this.nextBalls[i].element)
+            }catch(e){
+
+            }
+                
+        }       
     }
 
-    clearPaths(){
+    clearPaths():void{
         for (let i = 0; i < 9; i++) { 
             for (let j = 0; j < 9; j++) {
                 this.squares[j][i].path=new Array<Position>();
@@ -43,7 +81,264 @@ export class Kulki {
         }
     }
 
-    findPath(sq:Square){
+    checkPoints():void{
+        let deleted:boolean= false;
+        //Check if there are enough of the same colors in rows
+        let sameInRow:number = 0;
+        let color: string = null;
+        let rowStart:number = null;
+        let rowLength:number = null;
+        for (let i = 0; i < 9; i++) {
+            sameInRow = 0;
+            color=null;
+            rowStart=null;
+            rowLength=null;
+            for (let j = 0; j < 9; j++) {
+                if(this.squares[i][j].isOccupied()){
+                    if(this.squares[i][j].getBallColor()==color){
+                        sameInRow++;
+                    }else{
+                        sameInRow=0
+                        color = this.squares[i][j].getBallColor();
+                    }
+                }else{
+                    sameInRow=0;
+                    color=null;
+                }
+                if(sameInRow>=4){
+                    rowStart=j-sameInRow;
+                    rowLength=sameInRow;
+                    //console.log(i,j,j-sameInRow,sameInRow)
+                }
+            }
+            if(rowStart!=null){
+                for (let k = 0; k < rowLength+1; k++) {
+                    console.log("delete from sqares[",i ,"][",rowStart+k,"]")
+                    this.squares[i][rowStart+k].removeBall();
+                    this.points++;
+                }
+                deleted=true;
+            }
+        }
+
+        //Check if there are enough of the same colors in columns
+        let sameInCol:number = 0;
+        color = null;
+        let ColStart:number = null;
+        let ColLength:number = null;
+        for (let i = 0; i < 9; i++) {
+            sameInCol = 0;
+            color=null;
+            ColStart=null;
+            ColLength=null;
+            for (let j = 0; j < 9; j++) {
+                if(this.squares[j][i].isOccupied()){
+                    if(this.squares[j][i].getBallColor()==color){
+                        sameInCol++;
+                    }else{
+                        sameInCol=0
+                        color = this.squares[j][i].getBallColor();
+                    }
+                }else{
+                    sameInCol=0;
+                    color=null;
+                }
+                if(sameInCol>=4){
+                    ColStart=j-sameInCol;
+                    ColLength=sameInCol;
+                    //console.log(i,j,j-sameInRow,sameInRow)
+                }
+            }
+            if(ColStart!=null){
+                for (let k = 0; k < ColLength+1; k++) {
+                    console.log("delete from sqares[",ColStart+k ,"][",i,"]")
+                    this.squares[ColStart+k][i].removeBall();
+                    this.points++;
+                }
+                deleted=true;
+            }
+        }
+        //Check if there are enough of the same colors in diag left-right
+        for (let i = 0; i < 9; i++) {
+            sameInCol = 0;
+            color=null;
+            ColStart=null;
+            ColLength=null;
+            for (let j = 0; j < 9; j++) {
+                if(j+i<9){
+                    if(this.squares[j][j+i].isOccupied()){
+                        if(this.squares[j][j+i].getBallColor()==color){
+                            sameInCol++;
+                        }else{
+                            sameInCol=0
+                            color = this.squares[j][j+i].getBallColor();
+                        }
+                    }else{
+                        sameInCol=0;
+                        color=null;
+                    }
+                    if(sameInCol>=4){
+                        ColStart=j-sameInCol;
+                        ColLength=sameInCol;
+                        //console.log(i,j,j-sameInCol,sameInCol)
+                    }
+                }
+            }
+            if(ColStart!=null){
+                for (let k = 0; k < ColLength+1; k++) {
+                    console.log("delete from sqares[",ColStart+k ,"][",i+k+ColStart,"]")
+                    this.squares[ColStart+k][i+k+ColStart].removeBall();
+                    this.points++;
+                }
+                deleted=true;
+            }
+        }
+        for (let i = 0; i < 9; i++) {
+            sameInCol = 0;
+            color=null;
+            ColStart=null;
+            ColLength=null;
+            for (let j = 0; j < 9; j++) {
+                if(j+i<9){
+                    if(this.squares[j+i][j].isOccupied()){
+                        if(this.squares[j+i][j].getBallColor()==color){
+                            sameInCol++;
+                        }else{
+                            sameInCol=0
+                            color = this.squares[j+i][j].getBallColor();
+                        }
+                    }else{
+                        sameInCol=0;
+                        color=null;
+                    }
+                    if(sameInCol>=4){
+                        ColStart=j-sameInCol;
+                        ColLength=sameInCol;
+                        //console.log(i,j,j-sameInCol,sameInCol)
+                    }
+                }
+            }
+            if(ColStart!=null){
+                for (let k = 0; k < ColLength+1; k++) {
+                    console.log("delete from sqares[", i+k+ColStart,"][", ColStart+k,"]")
+                    this.squares[i+k+ColStart][ColStart+k].removeBall();
+                    this.points++;
+                }
+                deleted=true;
+            }
+        }
+        //Check if there are enough of the same colors in diag right-left
+        // for (let i = 8; i >= 0; i--) {
+        //     sameInCol = 0;
+        //     color=null;
+        //     ColStart=null;
+        //     ColLength=null;
+        //     for (let j = 0; j < 9; j++) {
+        //         if(j+i<9){
+        //             if(this.squares[j][j+i].isOccupied()){
+        //                 if(this.squares[j][j+i].getBallColor()==color){
+        //                     sameInCol++;
+        //                 }else{
+        //                     sameInCol=0
+        //                     color = this.squares[j][j+i].getBallColor();
+        //                 }
+        //             }else{
+        //                 sameInCol=0;
+        //                 color=null;
+        //             }
+        //             if(sameInCol>=4){
+        //                 ColStart=j-sameInCol;
+        //                 ColLength=sameInCol;
+        //                 //console.log(i,j,j-sameInCol,sameInCol)
+        //             }
+        //         }
+        //     }
+        //     if(ColStart!=null){
+        //         for (let k = 0; k < ColLength+1; k++) {
+        //             console.log("delete from sqares[",ColStart+k ,"][",i+k+ColStart,"]")
+        //             this.squares[ColStart+k][i+k+ColStart].removeBall();
+        //             this.points++;
+        //         }
+        //         deleted=true;
+        //     }
+        // }
+        // for (let i = 8; i >= 0; i--) {
+        //     sameInCol = 0;
+        //     color=null;
+        //     ColStart=null;
+        //     ColLength=null;
+        //     for (let j = 0; j < 9; j++) {
+        //         if(j+i<9){
+        //             if(this.squares[j+i][j].isOccupied()){
+        //                 if(this.squares[j+i][j].getBallColor()==color){
+        //                     sameInCol++;
+        //                 }else{
+        //                     sameInCol=0
+        //                     color = this.squares[j+i][j].getBallColor();
+        //                 }
+        //             }else{
+        //                 sameInCol=0;
+        //                 color=null;
+        //             }
+        //             if(sameInCol>=4){
+        //                 ColStart=j-sameInCol;
+        //                 ColLength=sameInCol;
+        //                 //console.log(i,j,j-sameInCol,sameInCol)
+        //             }
+        //         }
+        //     }
+        //     if(ColStart!=null){
+        //         for (let k = 0; k < ColLength+1; k++) {
+        //             console.log("delete from sqares[", i+k+ColStart,"][", ColStart+k,"]")
+        //             this.squares[i+k+ColStart][ColStart+k].removeBall();
+        //             this.points++;
+        //         }
+        //         deleted=true;
+        //     }
+        // }
+
+        //set points
+        document.getElementById("pts").innerText = this.points.toString();
+        if(!deleted)
+            this.randomBalls();
+    }
+
+    randomBalls():void{
+        let emptySquares:number = 0;
+        for (let i = 0; i < 9; i++) {
+            for (let j = 0; j < 9; j++) {
+                if(!this.squares[i][j].isOccupied())
+                    emptySquares++;
+            }
+        }
+        if(emptySquares<4){
+            for (let i = 0; i < emptySquares; i++){
+                let x:number = Math.floor(Math.random()*9)
+                let y:number = Math.floor(Math.random()*9)
+                while(!this.squares[y][x].putBall(this.nextBalls[i])){
+                    x= Math.floor(Math.random()*9)
+                    y = Math.floor(Math.random()*9)
+                }
+            }
+            alert("Przegrałeś!")
+            return;
+        }
+        for (let i = 0; i < 3; i++) {
+            let x:number = Math.floor(Math.random()*9)
+            let y:number = Math.floor(Math.random()*9)
+            while(!this.squares[y][x].putBall(this.nextBalls[i])){
+                x= Math.floor(Math.random()*9)
+                y = Math.floor(Math.random()*9)
+            }
+        }
+        this.nextBalls = new Array<Ball>();
+        for (let i = 0; i < 3; i++) {
+            this.nextBalls.push(new Ball(randomColor(),null))
+            this.nextSqaures[i].appendChild(this.nextBalls[i].element)
+        }
+    }
+
+    findPath(sq:Square):void{
         let path:Array<Array<Array<Position>>> =  new Array<Array<Array<Position>>>()
         for (let i = 0; i < 9; i++) {
             let row: Array<Array<Position>> = new Array<Array<Position>>(); 
@@ -91,27 +386,35 @@ export class Kulki {
                 queue.push(this.squares[square.pos.y-1][square.pos.x])
             }
         }
-        console.log(this.clickedSquare.path)
+        //console.log(this.clickedSquare.path)
         this.clickedSquare.path.forEach((el,i)=>{
             this.squares[el.y][el.x].element.style.backgroundColor="pink"
         })
         var finalPath: Position[] = [...this.clickedSquare.path];
         setTimeout(() => {
-            console.log(finalPath)
+           // console.log(finalPath)
             finalPath.forEach((el,i)=>{
                 this.squares[el.y][el.x].element.style.backgroundColor="white"
             })
         }, 1000);
-        if(queue.length!=0){
+        if(this.clickedSquare.path.length!=0){
             this.squares[this.clickedBall.pos.y][this.clickedBall.pos.x].removeBall()
             this.clickedSquare.putBall(this.clickedBall);
+            this.checkPoints()
         }
         this.clearPaths()
+        this.clickedBall.element.style.width="40px";
+        this.clickedBall.element.style.height="40px";
+        this.clickedBall.element.style.top="10px";
+        this.clickedBall.element.style.left="10px";
+        this.clickedBall.element.style.border="none";
+        this.clickedBall=null;
+        this.clickedSquare=null;
     }
 
 }
 
-let app:Kulki = new Kulki();
+export let app:Kulki = new Kulki();
 (<any>window).app = app;
 
 export function ballWrapper(target:object, key:string, descriptor:PropertyDescriptor):PropertyDescriptor{
@@ -127,6 +430,13 @@ export function ballWrapper(target:object, key:string, descriptor:PropertyDescri
         }
 
         let result = originalMethod.apply(this, args)
+
+        this.element.style.width="55px";
+        this.element.style.height="55px";
+        this.element.style.top="1px";
+        this.element.style.left="1px";
+        this.element.style.border="2px solid black";
+
         if(app.clickedBall==this){
             app.clickedBall.element.style.width="40px";
             app.clickedBall.element.style.height="40px";
@@ -137,13 +447,7 @@ export function ballWrapper(target:object, key:string, descriptor:PropertyDescri
         }else{
             app.clickedBall = this;
         }
-        
-
-        this.element.style.width="55px";
-        this.element.style.height="55px";
-        this.element.style.top="1px";
-        this.element.style.left="1px";
-        this.element.style.border="2px solid black";
+    
     }
 
     return descriptor;

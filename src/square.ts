@@ -1,4 +1,4 @@
-import {ballWrapper, squareWrapper} from "./main"
+import {ballWrapper, squareWrapper, Color} from "./main"
 
 export class Square {
     element:HTMLElement;
@@ -18,7 +18,7 @@ export class Square {
 
     @squareWrapper
     onClick(event:Event):void{
-        console.log(this)
+       // console.log(this)
     }
 
     isOccupied():boolean{
@@ -28,6 +28,7 @@ export class Square {
     removeBall():void{
         this.occupied=false;
         this.ball=null;
+        this.element.innerHTML="";
     }
 
     putBall(ball :Ball):boolean{
@@ -38,6 +39,9 @@ export class Square {
         this.occupied=true;
         this.element.appendChild(this.ball.element);
         return true;
+    }
+    getBallColor():string{
+        return this.ball.getColor();
     }
 
 }
@@ -69,26 +73,12 @@ export class Ball{
 
     @ballWrapper
     onClick(event:Event):Ball{
-        console.log(this)
+       // console.log(this)
         event.stopPropagation()
-        this.clicked=!this.clicked;
+        this.clicked=!this.clicked
         return this;
     }
-
-}
-
-export enum Color{
-    Red="Red",
-    Green="Green",
-    Blue="Blue",
-    Yellow="Yellow",
-    Cyan="Cyan",
-    Magenta="Magenta",
-    Grey="Grey" 
-}
-
-export function randomColor():string{
-    const keys = Object.keys(Color).filter(v => isNaN(Number(v)))
-    let val = keys[Math.floor(Math.random()*keys.length)]
-    return val;
+    getColor():string{
+        return this.color;
+    }
 }
