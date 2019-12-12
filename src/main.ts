@@ -17,10 +17,53 @@ function randomColor():string{
     return val;
 }
 
+function Pozdrowionko(name:string) {
+    console.log('-- decorator factory invoked --');
+    return function (constructor: Function) {
+        console.log('-- decorator invoked --');
+        constructor.prototype.pozdrowionko = function(){
+            return "Pozdrawiam " + name;
+        };
+    }
+}
+
+function aboveZero(){
+    let value: number;
+    return (target: any, propertyKey: string) => {
+        Object.defineProperty(
+            target,
+            propertyKey,
+            {
+                configurable: true,
+                enumerable: true,
+                get: () => {
+                    // Return the scoped value
+                    return value;
+                },
+                set: (newValue: number) => {
+                    // Update the scoped value with max(newValue, min)
+                    if(newValue<0)
+                        console.log("changing value to 0")
+                    value = (
+                        newValue >= 0
+                            ? newValue
+                            : 0
+                    );
+                }
+            },
+        );
+    }
+}
+
+
+
+
+@Pozdrowionko("Pana Mendele ;)")
 export class Kulki {
     clickedBall:Ball;
     squares: Square[][];
     clickedSquare:Square;
+    @aboveZero()
     points:number;
     nextBalls:Ball[];
     nextSqaures:HTMLElement[];
@@ -424,6 +467,7 @@ export class Kulki {
 
 export let app:Kulki = new Kulki();
 (<any>window).app = app;
+//app.pozdrowionko();
 
 export function ballWrapper(target:object, key:string, descriptor:PropertyDescriptor):PropertyDescriptor{
     

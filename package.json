@@ -10,6 +10,7 @@
     "webpack-cli": "^3.3.10"
   },
   "devDependencies": {
+    "reflect-metadata": "^0.1.13",
     "ts-loader": "^6.2.1"
   },
   "scripts": {
