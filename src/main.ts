@@ -228,74 +228,74 @@ export class Kulki {
             }
         }
         //Check if there are enough of the same colors in diag right-left
-        // for (let i = 8; i >= 0; i--) {
-        //     sameInCol = 0;
-        //     color=null;
-        //     ColStart=null;
-        //     ColLength=null;
-        //     for (let j = 0; j < 9; j++) {
-        //         if(j+i<9){
-        //             if(this.squares[j][j+i].isOccupied()){
-        //                 if(this.squares[j][j+i].getBallColor()==color){
-        //                     sameInCol++;
-        //                 }else{
-        //                     sameInCol=0
-        //                     color = this.squares[j][j+i].getBallColor();
-        //                 }
-        //             }else{
-        //                 sameInCol=0;
-        //                 color=null;
-        //             }
-        //             if(sameInCol>=4){
-        //                 ColStart=j-sameInCol;
-        //                 ColLength=sameInCol;
-        //                 //console.log(i,j,j-sameInCol,sameInCol)
-        //             }
-        //         }
-        //     }
-        //     if(ColStart!=null){
-        //         for (let k = 0; k < ColLength+1; k++) {
-        //             console.log("delete from sqares[",ColStart+k ,"][",i+k+ColStart,"]")
-        //             this.squares[ColStart+k][i+k+ColStart].removeBall();
-        //             this.points++;
-        //         }
-        //         deleted=true;
-        //     }
-        // }
-        // for (let i = 8; i >= 0; i--) {
-        //     sameInCol = 0;
-        //     color=null;
-        //     ColStart=null;
-        //     ColLength=null;
-        //     for (let j = 0; j < 9; j++) {
-        //         if(j+i<9){
-        //             if(this.squares[j+i][j].isOccupied()){
-        //                 if(this.squares[j+i][j].getBallColor()==color){
-        //                     sameInCol++;
-        //                 }else{
-        //                     sameInCol=0
-        //                     color = this.squares[j+i][j].getBallColor();
-        //                 }
-        //             }else{
-        //                 sameInCol=0;
-        //                 color=null;
-        //             }
-        //             if(sameInCol>=4){
-        //                 ColStart=j-sameInCol;
-        //                 ColLength=sameInCol;
-        //                 //console.log(i,j,j-sameInCol,sameInCol)
-        //             }
-        //         }
-        //     }
-        //     if(ColStart!=null){
-        //         for (let k = 0; k < ColLength+1; k++) {
-        //             console.log("delete from sqares[", i+k+ColStart,"][", ColStart+k,"]")
-        //             this.squares[i+k+ColStart][ColStart+k].removeBall();
-        //             this.points++;
-        //         }
-        //         deleted=true;
-        //     }
-        // }
+        for (let i = 8; i >= 0; i--) {
+            sameInCol = 0;
+            color=null;
+            ColStart=null;
+            ColLength=null;
+            for (let j = 0; j < 9; j++) {
+                if(i-j>=0){
+                    if(this.squares[i-j][j].isOccupied()){
+                        if(this.squares[i-j][j].getBallColor()==color){
+                            sameInCol++;
+                        }else{
+                            sameInCol=0
+                            color = this.squares[i-j][j].getBallColor();
+                        }
+                    }else{
+                        sameInCol=0;
+                        color=null;
+                    }
+                    if(sameInCol>=4){
+                        ColStart=i-j;
+                        ColLength=sameInCol;
+                        console.log(i,j,ColStart,sameInCol)
+                    }
+                }
+            }
+            if(ColStart!=null){
+                for (let k = 0; k < ColLength+1; k++) {
+                    console.log("delete from sqares[",ColStart+k ,"][",i-k-ColStart,"]")
+                    this.squares[ColStart+k][i-k-ColStart].removeBall();
+                    this.points++;
+                }
+                deleted=true;
+            }
+        }
+        for (let i = 0; i < 9; i++) {
+            sameInCol = 0;
+            color=null;
+            ColStart=null;
+            ColLength=null;
+            for (let j = 0; j < 9; j++) {
+                if(i+j<9){
+                    if(this.squares[8-j][i+j].isOccupied()){
+                        if(this.squares[8-j][i+j].getBallColor()==color){
+                            sameInCol++;
+                        }else{
+                            sameInCol=0
+                            color = this.squares[8-j][i+j].getBallColor();
+                        }
+                    }else{
+                        sameInCol=0;
+                        color=null;
+                    }
+                    if(sameInCol>=4){
+                        ColStart=j-sameInCol;
+                        ColLength=sameInCol;
+                        console.log(i,j,ColStart,sameInCol)
+                    }
+                }
+            }
+            if(ColStart!=null){
+                for (let k = 0; k < ColLength+1; k++) {
+                    console.log("delete from sqares[",8-ColStart-k ,"][",i+k+ColStart,"]")
+                    this.squares[8-ColStart-k][i+k+ColStart].removeBall();
+                    this.points++;
+                }
+                deleted=true;
+            }
+        }
 
         //set points
         document.getElementById("pts").innerText = this.points.toString();
