@@ -131,6 +131,7 @@ export class Kulki {
         let color: string = null;
         let rowStart:number = null;
         let rowLength:number = null;
+        let removeFromSqares:Square[] = new Array<Square>();
         for (let i = 0; i < 9; i++) {
             sameInRow = 0;
             color=null;
@@ -157,8 +158,8 @@ export class Kulki {
             if(rowStart!=null){
                 for (let k = 0; k < rowLength+1; k++) {
                     console.log("delete from sqares[",i ,"][",rowStart+k,"]")
-                    this.squares[i][rowStart+k].removeBall();
-                    this.points++;
+                    removeFromSqares.push( this.squares[i][rowStart+k])
+                    //this.points++;
                 }
                 deleted=true;
             }
@@ -195,8 +196,8 @@ export class Kulki {
             if(ColStart!=null){
                 for (let k = 0; k < ColLength+1; k++) {
                     console.log("delete from sqares[",ColStart+k ,"][",i,"]")
-                    this.squares[ColStart+k][i].removeBall();
-                    this.points++;
+                    removeFromSqares.push(this.squares[ColStart+k][i])
+                    //this.points++;
                 }
                 deleted=true;
             }
@@ -230,8 +231,8 @@ export class Kulki {
             if(ColStart!=null){
                 for (let k = 0; k < ColLength+1; k++) {
                     console.log("delete from sqares[",ColStart+k ,"][",i+k+ColStart,"]")
-                    this.squares[ColStart+k][i+k+ColStart].removeBall();
-                    this.points++;
+                    removeFromSqares.push(this.squares[ColStart+k][i+k+ColStart])
+                    //this.points++;
                 }
                 deleted=true;
             }
@@ -264,8 +265,8 @@ export class Kulki {
             if(ColStart!=null){
                 for (let k = 0; k < ColLength+1; k++) {
                     console.log("delete from sqares[", i+k+ColStart,"][", ColStart+k,"]")
-                    this.squares[i+k+ColStart][ColStart+k].removeBall();
-                    this.points++;
+                    removeFromSqares.push(this.squares[i+k+ColStart][ColStart+k])
+                    //this.points++;
                 }
                 deleted=true;
             }
@@ -299,8 +300,8 @@ export class Kulki {
             if(ColStart!=null){
                 for (let k = 0; k < ColLength+1; k++) {
                     console.log("delete from sqares[",ColStart+k ,"][",i-k-ColStart,"]")
-                    this.squares[ColStart+k][i-k-ColStart].removeBall();
-                    this.points++;
+                    removeFromSqares.push(this.squares[ColStart+k][i-k-ColStart])
+                    //this.points++;
                 }
                 deleted=true;
             }
@@ -333,12 +334,18 @@ export class Kulki {
             if(ColStart!=null){
                 for (let k = 0; k < ColLength+1; k++) {
                     console.log("delete from sqares[",8-ColStart-k ,"][",i+k+ColStart,"]")
-                    this.squares[8-ColStart-k][i+k+ColStart].removeBall();
-                    this.points++;
+                    removeFromSqares.push(this.squares[8-ColStart-k][i+k+ColStart])
+                    //this.points++;
                 }
                 deleted=true;
             }
         }
+
+        removeFromSqares = Array.from(new Set(removeFromSqares));
+        removeFromSqares.forEach((el, i)=>{
+            el.removeBall();
+            this.points++
+        })
 
         //set points
         document.getElementById("pts").innerText = this.points.toString();
