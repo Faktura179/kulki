@@ -381,7 +381,7 @@ export class Kulki {
         }
     }
 
-    findPath(sq:Square, move:boolean):void{
+    findPath(sq:Square, move:boolean, color:string = "#e3c2e9"):void{
         let path:Array<Array<Array<Position>>> =  new Array<Array<Array<Position>>>()
         for (let i = 0; i < 9; i++) {
             let row: Array<Array<Position>> = new Array<Array<Position>>(); 
@@ -433,7 +433,7 @@ export class Kulki {
         this.clickedSquare.path.forEach((el,i)=>{
             this.squares[el.y][el.x].element.style.backgroundColor="pink"
             if(!move)
-            this.squares[el.y][el.x].element.style.backgroundColor="#e3c2e9"
+            this.squares[el.y][el.x].element.style.backgroundColor=color
         })
         var finalPath: Position[] = [...this.clickedSquare.path];
         if(move)
@@ -517,23 +517,27 @@ export function squareWrapper(target:object, key:string, descriptor:PropertyDesc
 
     return descriptor;
 }
-export function highlightPath(target:object, key:string, descriptor:PropertyDescriptor):PropertyDescriptor{
-    
-    let originalMethod=descriptor.value;
-    descriptor.value=function(...args:any[]):void{
 
-        for (let i = 0; i < 9; i++) {
-            for (let j = 0; j < 9; j++) {
-                app.squares[i][j].element.style.backgroundColor="white"
+export function highlightPath(color:string){
+
+    return function  (target:object, key:string, descriptor:PropertyDescriptor):PropertyDescriptor{
+        
+        let originalMethod=descriptor.value;
+        descriptor.value=function(...args:any[]):void{
+
+            for (let i = 0; i < 9; i++) {
+                for (let j = 0; j < 9; j++) {
+                    app.squares[i][j].element.style.backgroundColor="white"
+                }
+            }
+
+            let result = originalMethod.apply(this, args)
+            if(app.clickedBall!=null && app.clickedBall.pos!=null){
+                app.clickedSquare = this;
+                app.findPath(app.squares[app.clickedBall.pos.y][app.clickedBall.pos.x],false,color);
             }
         }
 
-        let result = originalMethod.apply(this, args)
-        if(app.clickedBall!=null && app.clickedBall.pos!=null){
-            app.clickedSquare = this;
-            app.findPath(app.squares[app.clickedBall.pos.y][app.clickedBall.pos.x],false);
-        }
+        return descriptor;
     }
-
-    return descriptor;
 }

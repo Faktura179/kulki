@@ -22,7 +22,7 @@ export class Square {
        // console.log(this)
     }
 
-    @highlightPath
+    @highlightPath("red")
     onHover(event:Event):void{
         //console.log(this)
         //console.log(event.target)
